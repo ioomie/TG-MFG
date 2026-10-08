@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.6.1
+
+- Proxy regression tests handle Windows connection deadlines and Python 3.9 timeout types while explicitly checking that failures never connect directly to the destination.
+- Update checks request their first batch immediately, including with the process-local monotonic clock on macOS Python 3.9; subsequent batches still respect the selected interval.
+
 ## 1.6.0
 
 - English-default UI with a persistent Simplified Chinese option; switching preserves current filters and user content.

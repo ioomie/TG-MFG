@@ -626,11 +626,14 @@ class TelegramService:
 
     async def _refresh(self, channel):
         old_rows = list(self.rows)
-        last_request = 0
+        last_request = None
         try:
             for offset in range(0, len(old_rows), 100):
                 interval = self.scan["request_interval"]
-                await asyncio.sleep(max(0, interval - (time.monotonic() - last_request)))
+                # Pace subsequent requests; the first must not depend on the
+                # platform's monotonic epoch (process-local on older macOS Python).
+                await asyncio.sleep(0 if last_request is None else
+                                    max(0, interval - (time.monotonic() - last_request)))
                 last_request = time.monotonic()
                 batch = old_rows[offset:offset+100]
                 response = await asyncio.wait_for(self.client(functions.channels.GetMessagesRequest(

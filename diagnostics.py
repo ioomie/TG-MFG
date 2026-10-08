@@ -8,7 +8,7 @@ from collections import deque
 from datetime import datetime, timezone
 from logging.handlers import RotatingFileHandler
 
-CORE_VERSION = "1.6.0"
+CORE_VERSION = "1.6.1"
 ROUTES = {"/api/bootstrap", "/api/status", "/api/connect", "/api/send-code", "/api/sign-in",
           "/api/channels", "/api/scan", "/api/results", "/api/cancel", "/api/channel-count",
           "/api/disconnect", "/api/shutdown", "/api/diagnostics", "/api/debug", "/api/test-proxy",

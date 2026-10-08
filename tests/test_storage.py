@@ -206,6 +206,29 @@ class PersistenceTests(unittest.IsolatedAsyncioTestCase):
         restarted = self.new_service()
         self.assertEqual((await restarted.open_cache({'channel_id':'101'}))['messages'], result['messages'])
 
+    async def test_refresh_first_request_is_immediate_with_zero_based_clock(self):
+        await self.login()
+        await self.scan()
+        gate = asyncio.Event()
+        original_client = self.service.client
+        class Waiting(FakeClient):
+            async def __call__(self, request):
+                gate.set()
+                await asyncio.Event().wait()
+        self.service.client = Waiting(original_client.session)
+        original = [dict(row) for row in self.service.rows]
+        # Python 3.9 on macOS uses a process-local monotonic origin. Isolate the
+        # application's clock so asyncio's own deadline clock keeps advancing.
+        with patch('app.time', SimpleNamespace(monotonic=lambda:0)):
+            await self.service.refresh_messages({'scan_id':self.service.scan['scan_id'],
+                'channel_id':self.service.scan['channel_id'], 'request_interval':30})
+            try:
+                await asyncio.wait_for(gate.wait(),2)
+            finally:
+                await self.service.cancel_scan()
+        self.assertEqual(self.service.rows,original)
+        self.assertEqual(self.service.scan['status'],'cancelled')
+
     async def test_refresh_partial_failure_and_cancel_preserve_unchecked_rows(self):
         await self.login()
         self.service.client.messages = [message(5000-i) for i in range(201)]

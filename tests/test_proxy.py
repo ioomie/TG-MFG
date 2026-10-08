@@ -62,10 +62,10 @@ class ProxyTests(unittest.IsolatedAsyncioTestCase):
         return parse_proxy({'proxy_enabled':True,'proxy_type':kind,'proxy_host':'127.0.0.1',
                             'proxy_port':self.server.sockets[0].getsockname()[1]})
 
-    def windows_native_connect(self,calls):
+    def windows_native_connect(self,calls,connect_impl=None):
         # Proactor ConnectEx uses a socket handle rather than a Python connect override.
         # This wrapper reproduces that behavior on the development Mac.
-        original=self.native_connect
+        original=connect_impl or self.native_connect
         class NativeView:
             def __init__(self,sock): self.sock=sock
             def __getattr__(self,name): return getattr(self.sock,name)
@@ -73,7 +73,8 @@ class ProxyTests(unittest.IsolatedAsyncioTestCase):
         async def connect(sock,address):
             calls.append(address);sock.setblocking(False)
             try:return await original(sock if sys.platform == "win32" else NativeView(sock),address)
-            except Exception:
+            except BaseException:
+                # wait_for cancellation must also release the test socket.
                 sock.close()
                 raise
         return connect
@@ -104,7 +105,9 @@ class ProxyTests(unittest.IsolatedAsyncioTestCase):
         reserved=socket.socket();reserved.bind(('127.0.0.1',0));port=reserved.getsockname()[1];reserved.close()
         calls=[];self.loop.sock_connect=self.windows_native_connect(calls)
         connection=ConnectionTcpFull('127.0.0.1',port,1,loggers=defaultdict(lambda:logging.getLogger('test')),proxy=proxy)
-        with patch.object(transport,'python_socks',None),self.assertRaises(OSError):
+        # A closed port can time out on Windows instead of failing immediately.
+        # Python 3.9's asyncio.TimeoutError is not an OSError subclass.
+        with patch.object(transport,'python_socks',None),self.assertRaises((OSError,asyncio.TimeoutError)):
             await connection._proxy_connect(timeout=1)
         self.assertEqual(calls,[('127.0.0.1',port)])
         self.assertEqual(self.targets,[])
@@ -128,9 +131,27 @@ class ProxyTests(unittest.IsolatedAsyncioTestCase):
     async def test_closed_proxy_fails_without_fallback(self):
         proxy=await self.proxy('socks5')
         self.server.close();await self.server.wait_closed()
+        calls=[];self.loop.sock_connect=self.windows_native_connect(calls)
         with self.assertRaises(Exception) as raised:
             await probe_proxy(proxy,Diagnostics(),dest_host='127.0.0.2',dest_port=54321,timeout=1)
-        self.assertEqual(error_status(raised.exception),503)
+        # Refusal (503) and a connection deadline (504) are both valid OS outcomes.
+        self.assertIn(error_status(raised.exception),(503,504))
+        self.assertEqual(calls,[(proxy['addr'],proxy['port'])])
+        self.assertEqual(self.targets,[])
+
+    async def test_proxy_connect_timeout_fails_without_direct_fallback(self):
+        proxy=await self.proxy('socks5')
+        calls=[];sockets=[]
+        async def pending_connect(sock,address):
+            sockets.append(sock)
+            await asyncio.Future()
+        self.loop.sock_connect=self.windows_native_connect(calls,pending_connect)
+        with self.assertRaises(Exception) as raised:
+            await probe_proxy(proxy,Diagnostics(),dest_host='127.0.0.2',dest_port=54321,timeout=.05)
+        self.assertEqual(error_status(raised.exception),504)
+        self.assertEqual(calls,[(proxy['addr'],proxy['port'])])
+        self.assertTrue(sockets)
+        self.assertTrue(all(sock.fileno()==-1 for sock in sockets))
         self.assertEqual(self.targets,[])
 
     async def test_invalid_proxy_settings_and_disabled_probe(self):

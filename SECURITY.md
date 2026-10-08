@@ -24,4 +24,4 @@ For ordinary bugs, include the version, OS/browser and failing steps, plus revie
 
 ## Maintenance
 
-Current core version: **1.6.0**. Recheck dependency advisories before releases. Pinned versions and hashes verify expected files, not freedom from vulnerabilities. Bulk reading remains subject to Telegram limits and account rules; no fixed message count guarantees safety.
+Current core version: **1.6.1**. Recheck dependency advisories before releases. Pinned versions and hashes verify expected files, not freedom from vulnerabilities. Bulk reading remains subject to Telegram limits and account rules; no fixed message count guarantees safety.
