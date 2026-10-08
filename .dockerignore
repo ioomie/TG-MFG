@@ -1,0 +1,7 @@
+*
+!Dockerfile
+!portal.py
+!web/
+!web/**
+!downloads/
+!downloads/*.zip

@@ -1,0 +1,13 @@
+services:
+  tg-mfg:
+    build: .
+    image: tg-mfg:local
+    restart: unless-stopped
+    ports:
+      - "${TG_MFG_BIND:-127.0.0.1}:${TG_MFG_PORT:-7333}:7333"
+    command: ["python", "-B", "portal.py", "--origin", "${TG_MFG_ORIGIN:?Set TG_MFG_ORIGIN in .env}"]
+    read_only: true
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL

@@ -1,0 +1,11 @@
+* text=auto
+*.py text eol=lf
+*.js text eol=lf
+*.mjs text eol=lf
+*.sh text eol=lf
+*.command text eol=lf
+*.bat text eol=crlf
+*.md text eol=lf
+*.yaml text eol=lf
+# Preserve third-party license text exactly as distributed upstream.
+LICENSES/** -whitespace

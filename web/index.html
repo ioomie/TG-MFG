@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="app-token" content="__APP_TOKEN__">
+  <meta name="core-mode" content="__CORE_MODE__">
+  <meta name="core-origin" content="__CORE_ORIGIN__">
+  <meta name="managed-core" content="__MANAGED_CORE__">
+  <title>TG-MFG · Telegram Message Filter Gateway</title>
+  <script src="/theme.js"></script>
+  <link rel="stylesheet" href="/styles.css">
+  <link rel="stylesheet" href="/themes.css">
+  <link rel="stylesheet" href="/core.css">
+  <script type="module" src="/app.js"></script>
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="/" aria-label="TG-MFG home"><span class="brand-icon">↗</span><span>TG-MFG<small>TELEGRAM REACTIONS</small></span></a>
+    <div class="header-actions"><label for="languageSelect" class="sr-only">Language</label><select id="languageSelect" aria-label="Language"><option value="en">English</option><option value="zh-CN">简体中文</option></select><label for="themeSelect" class="sr-only">Theme</label><select id="themeSelect" aria-label="Theme"><option value="system">◐ System</option><option value="light">☀ Light</option><option value="dark">☾ Dark</option></select><button id="manageCore" class="link-button" hidden>Install &amp; download</button><button id="showDebug" class="link-button">Connection diagnostics</button><div class="session"><span class="dot" id="statusDot"></span><span id="connectionStatus">Disconnected</span><button id="disconnect" class="link-button" hidden>Disconnect &amp; clear</button><button id="stopCore" class="link-button" hidden>Stop core</button></div></div>
+  </header>
+  <main>
+    <section class="intro"><div class="eyebrow">BRING THE GOOD READS FORWARD</div><h1>Discover your channel’s<span>best reads.</span></h1><p>Choose a channel. Find popular messages by reactions and your next read by keyword.</p></section>
+    <div id="notice" class="notice" role="status" aria-live="polite" hidden></div>
+    <section id="debugPanel" class="panel core-panel" hidden><div class="panel-heading"><h2>Connection diagnostics</h2></div><p id="debugStatus" class="field-help">Diagnostics record routes, status codes, timing and error types, never credentials or messages. A successful core check only verifies the local service. Connecting to Telegram is a separate step.</p><div class="core-actions"><button id="enableDebug" class="secondary">Enable core debug log</button><button id="testProxy" class="secondary">Test proxy settings</button><button id="exportDebug" class="secondary">Export diagnostics</button></div><pre id="debugOutput" class="debug-output" aria-live="polite"></pre></section>
+    <section id="corePanel" class="panel core-panel" hidden>
+      <div class="panel-heading"><span class="step">00</span><h2 id="coreTitle">Connect local core</h2></div>
+      <p id="coreStatus" class="muted" role="status" aria-live="polite">Checking the local core…</p>
+      <div id="coreActions" class="core-actions">
+        <button id="returnWorkspace" class="secondary" hidden>Back to workspace →</button>
+        <a id="startCore" class="primary" href="tg-mfg://start" hidden>Start core <span>→</span></a>
+        <button id="retryCore" class="primary">Check connection again <span>↻</span></button>
+        <a id="downloadCore" class="secondary" hidden>Download local core</a>
+        <a id="openLocalCore" class="secondary" href="http://127.0.0.1:8765" target="_blank" rel="noopener noreferrer">Open local page ↗</a>
+      </div>
+      <ol id="coreSteps" class="core-steps"><li>Download and fully extract the core package.</li><li id="coreLaunchStep">Start the core and keep the terminal window open.</li><li>Return here and check the connection. Allow local network access if the browser asks.</li></ol>
+      <p id="corePlatformNote" class="field-help"></p>
+      <p id="coreInstallNote" class="field-help"></p>
+      <p class="field-help">The website serves the interface and downloads. Your local core connects to Telegram. Data stays in memory by default; you can separately opt in to saving messages and login locally.</p>
+    </section>
+    <div id="workspace" class="workspace">
+      <aside class="sidebar">
+        <section id="loginPanel" class="panel">
+          <div class="panel-heading"><span class="step">01</span><h2>Connect Telegram</h2></div>
+          <p class="muted">Login is not saved by default. You can enable “Keep me signed in” below.</p>
+          <form id="credentialsForm">
+            <label for="apiId">API ID</label><input id="apiId" inputmode="numeric" autocomplete="off" placeholder="e.g. 12345678" required>
+            <label for="apiHash">API Hash</label><input id="apiHash" type="password" autocomplete="off" placeholder="Paste your 32-character API Hash" required>
+            <details class="proxy"><summary>Use a proxy (optional)</summary><label class="check"><input id="proxyEnabled" type="checkbox">Enable proxy</label><div class="two-columns"><div><label for="proxyType">Type</label><select id="proxyType"><option value="socks5">SOCKS5</option><option value="http">HTTP CONNECT</option></select></div><div><label for="proxyPort">Port</label><input id="proxyPort" inputmode="numeric" value="7890"></div></div><label for="proxyHost">Host</label><input id="proxyHost" value="127.0.0.1" autocomplete="off"></details>
+            <button class="primary full" type="submit">Connect account <span>→</span></button>
+            <a class="helper-link" href="https://my.telegram.org/apps" target="_blank" rel="noopener noreferrer">Get API ID and API Hash ↗</a>
+          </form>
+          <form id="phoneForm" hidden><label for="phone">Phone number (with country code)</label><input id="phone" type="tel" autocomplete="off" placeholder="+86 …" required><p class="field-help">The login code is usually sent to your official Telegram app.</p><button class="primary full" type="submit">Send code →</button></form>
+          <form id="codeForm" hidden><label for="code">Login code</label><input id="code" inputmode="numeric" autocomplete="off" placeholder="Enter the code you received" required><button class="primary full" type="submit">Verify &amp; sign in →</button><button id="resendCode" class="link-button" type="button">Resend code</button></form>
+          <form id="passwordForm" hidden><label for="password">Two-step verification password</label><input id="password" type="password" autocomplete="off" placeholder="Enter your Telegram two-step password" required><button class="primary full" type="submit">Complete sign-in →</button></form>
+        </section>
+        <section id="storagePanel" class="panel">
+          <div class="panel-heading"><h2>Local storage</h2></div>
+          <label class="check"><input id="saveMessages" type="checkbox" disabled>Save messages locally</label>
+          <p class="field-help">Save snapshots and blocked records by account and channel for offline search after restarting. Disabling this deletes messages from disk; the current list remains available.</p>
+          <label class="check"><input id="retainLogin" type="checkbox" disabled>Keep me signed in</label>
+          <p class="field-help">Login is protected by macOS Keychain or Windows current-user encryption. Codes and two-step passwords are never saved. Disabling this deletes the saved login while keeping the current session active.</p>
+          <p id="storageStatus" class="field-help" role="status">This feature requires core 1.5.0.</p>
+          <button id="retryLogin" class="secondary full" hidden>Retry saved login</button>
+          <label for="savedChannel">Saved channels</label><select id="savedChannel" disabled><option value="">No saved messages</option></select>
+          <button id="openSaved" class="secondary full" disabled>Open local snapshot</button>
+        </section>
+        <section id="channelPanel" class="panel" hidden>
+          <div class="panel-heading"><span class="step">01</span><h2>Choose a channel</h2><button id="reloadChannels" class="icon-button" title="Refresh channels" aria-label="Refresh channels">↻</button></div>
+          <p class="muted" id="channelCount">Loading your joined channels…</p>
+          <label for="channelSearch" class="sr-only">Search channels</label><input id="channelSearch" type="search" placeholder="Search channel name or @username">
+          <label for="channelSelect" class="sr-only">Channel list</label><select id="channelSelect" size="7" class="channel-list"></select>
+          <button id="queryCount" class="secondary full">Count messages</button>
+          <p id="channelTotal" class="field-help" aria-live="polite">Count channel messages first, without fetching the entire history.</p>
+          <div class="separator"></div>
+          <div class="panel-heading"><span class="step">02</span><h2>Fetch messages</h2></div>
+          <label for="limit">Fetch range</label><select id="limit"><option value="500">Latest 500 records</option><option value="2000" selected>Latest 2,000 records</option><option value="10000">Latest 10,000 records</option><option value="50000">Latest 50,000 records</option><option value="0">All readable history</option></select>
+          <label for="scanSpeed">Fetch speed · Minimum batch interval</label><select id="scanSpeed" disabled><option value="0.5">0.5 seconds</option><option value="1" selected>1 second (default)</option><option value="2">2 seconds</option><option value="5">5 seconds</option><option value="10">10 seconds</option><option value="30">30 seconds</option></select>
+          <p id="scanSpeedHelp" class="field-help" role="status">Up to 100 records per batch. Speed depends on the network and returned records. You can adjust the interval while fetching; the current wait will finish normally.</p>
+          <details class="dates"><summary>Publication dates (optional)</summary><label for="startDate">Start date</label><input id="startDate" type="date"><label for="endDate">End date</label><input id="endDate" type="date"><p class="field-help">Both dates are inclusive, using your local time zone.</p></details>
+          <button id="fetch" class="primary full">Fetch &amp; explore <span>→</span></button><button id="cancel" class="secondary full" hidden>Stop fetching &amp; keep results</button>
+          <p id="scanProgress" class="field-help" aria-live="polite">Larger histories take longer to fetch.</p>
+        </section>
+        <div class="local-note"><span>◉</span><div>Runs locally · Read-only browsing<p>Reads channels and messages through the Telegram API. Disconnect to clear the current session.</p></div></div>
+      </aside>
+      <section id="resultsArea" class="results-area" aria-label="Message explorer">
+        <div class="results-heading"><div><div class="eyebrow">CHANNEL EXPLORER</div><h2 id="resultsTitle">Message explorer</h2></div><div class="results-actions"><button id="toggleBlocked" class="secondary" aria-pressed="false">Blocked box (0)</button><span id="loadedBadge" class="badge">Waiting for messages</span></div></div>
+        <p id="blockedHelp" class="field-help" hidden>These messages are excluded from the normal list, keyword search and hashtag filters. Restore them to include them again. Saving messages also saves blocked records. “Disconnect &amp; clear” deletes local saved data.</p>
+        <div class="core-actions" id="snapshotActions"><button id="refreshMessages" class="secondary" disabled>Check fetched messages for updates</button><span id="snapshotStatus" class="field-help"></span></div>
+        <p class="field-help">Checks text, reactions and availability by message ID. To fetch new messages, use “Fetch &amp; explore”.</p>
+        <p id="scanReport" class="notice info" role="status" hidden></p>
+        <div id="resultToolbar" class="toolbar">
+          <label for="messageSearch" class="search-label">Search fetched messages</label>
+          <div class="search-wrap"><span aria-hidden="true">⌕</span><input id="messageSearch" type="search" placeholder="Search keywords in the current sort order…" disabled></div>
+          <div class="filters"><div><label for="emojiSelect">Reaction to rank by</label><select id="emojiSelect" disabled><option value="">All reactions</option><option value="❤">❤️ Heart</option><option value="👍">👍 Thumbs up</option><option value="🔥">🔥 Fire</option></select></div><div><label for="sortSelect">Sort order</label><select id="sortSelect" disabled><option value="reactions">Most reactions</option><option value="newest">Newest first</option><option value="oldest">Oldest first</option></select></div><div><label for="hashtagSelect"># Hashtag filter</label><select id="hashtagSelect" disabled><option value="">All hashtags</option></select></div><label class="check zero"><input id="hideZero" type="checkbox" disabled>Only messages with reactions</label></div>
+        </div>
+        <p id="resultSummary" class="result-summary">Text and hashtag filters search fetched messages in the current sort order.</p>
+        <div id="emptyState" class="empty-state"><div class="empty-art" aria-hidden="true"><span>❤️</span><span>↗</span><span>🔥</span><span>👍</span></div><h3>Good reads are waiting</h3><p>Connect your account and choose a channel.<br>Fetched messages will appear here, sorted by reactions.</p><div class="feature-pills"><span>Rank by reactions</span><span>Search keywords</span><span>Open originals</span></div></div>
+        <div id="messageList" class="message-list"></div>
+        <div id="pagination" class="pagination" hidden><button id="previous" class="secondary">← Previous</button><span id="pageInfo"></span><button id="next" class="secondary">Next →</button></div>
+      </section>
+    </div>
+  </main>
+  <footer>TG-MFG <span>Let reactions guide you to something worth reading.</span></footer>
+</body>
+</html>

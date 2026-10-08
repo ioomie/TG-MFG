@@ -1,0 +1,46 @@
+# Local Python environments / caches
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+# Account / installation state and diagnostic exports
+*.session*
+core-settings.json
+installation.json
+startup.log
+*.log
+*.log.*
+TG-MFG-diagnostics*.json
+launcher.lock
+# Private configuration / certificates
+.env
+.env.*
+!.env.example
+tls/
+*.key
+*.pem
+*.p12
+*.pfx
+# Build outputs and packaged runtimes
+build/
+dist/
+runtime/
+mac-launcher/
+downloads/*
+!downloads/.gitkeep
+*.zip
+*.tar.gz
+# Editors and OS files
+.DS_Store
+.idea/
+.vscode/
+
+# Local opt-in snapshots and protected login
+data/
+*.sqlite3*
+login.bin*
+preferences.json
+
+# Local coding-agent metadata
+.serena/

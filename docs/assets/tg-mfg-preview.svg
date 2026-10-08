@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="920" viewBox="0 0 1440 920" role="img" aria-labelledby="title description">
+<title id="title">TG-MFG — Telegram Message Filter Gateway</title><desc id="description">Illustrative interface showing a fictional channel with reaction rankings, keyword and hashtag filters, and a blocked box in a cream and forest-green card layout.</desc>
+<defs><filter id="shadow"><feDropShadow dx="0" dy="5" stdDeviation="12" flood-color="#23352f" flood-opacity=".05"/></filter><style>text{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;fill:#23352f}.muted{fill:#7b8580}.green{fill:#27674f}.white{fill:white}.small{font-size:14px}.label{font-size:12px;font-weight:600;letter-spacing:1.6px}.card{fill:white;stroke:#e4e8df;stroke-width:1}</style></defs>
+<rect width="1440" height="920" fill="#f7f8f4"/>
+<rect x="0" y="0" width="1440" height="82" fill="white"/><path d="M0 82H1440" stroke="#e4e8df"/>
+<rect x="56" y="23" width="38" height="38" rx="10" fill="#27674f" transform="rotate(-6 75 42)"/><text x="64" y="50" font-size="30" class="white">↗</text>
+<text x="109" y="41" font-size="22" font-weight="750">TG-MFG</text><text x="110" y="59" font-size="9" letter-spacing="1.9" class="muted">TELEGRAM MESSAGE FILTER GATEWAY</text>
+<rect x="1040" y="26" width="95" height="32" rx="9" fill="#f7f8f4"/><text x="1057" y="47" class="small">English ⌄</text>
+<rect x="1147" y="26" width="93" height="32" rx="9" fill="#f7f8f4"/><text x="1161" y="47" class="small">◐ System</text>
+<circle cx="1270" cy="42" r="4" fill="#27674f"/><text x="1283" y="47" class="small green">Local session</text>
+<text x="58" y="125" class="label green">BRING THE GOOD READS FORWARD</text>
+<text x="56" y="179" font-size="43" font-weight="750">Discover your channel’s <tspan fill="#27674f">best reads.</tspan></text>
+<text x="58" y="213" font-size="17" class="muted">Choose a channel. Find popular messages by reactions and your next read by keyword.</text>
+<!-- Sidebar -->
+<rect x="56" y="249" width="306" height="408" rx="16" class="card" filter="url(#shadow)"/>
+<circle cx="88" cy="285" r="14" fill="#e5efdc"/><text x="80" y="290" font-size="11" class="green">01</text><text x="112" y="291" font-size="19" font-weight="650">Choose a channel</text><text x="325" y="291" font-size="20" class="muted">↻</text>
+<text x="78" y="325" class="small muted">3 joined channels</text>
+<rect x="78" y="343" width="262" height="40" rx="8" fill="#f7f8f4" stroke="#e4e8df"/><text x="91" y="368" class="small muted">⌕  Search channels</text>
+<rect x="78" y="397" width="262" height="37" rx="8" fill="#e5efdc"/><text x="92" y="421" class="small green" font-weight="650">The Reading Room</text>
+<text x="92" y="462" class="small">Field Notes</text><text x="92" y="499" class="small">Small Discoveries</text>
+<rect x="78" y="519" width="262" height="36" rx="8" fill="white" stroke="#e4e8df"/><text x="151" y="542" class="small green" font-weight="600">Count messages</text>
+<text x="78" y="581" class="small muted">2,048 visible records</text>
+<text x="78" y="614" class="small muted">Batch interval: 1 second</text>
+<rect x="56" y="675" width="306" height="178" rx="16" class="card"/>
+<text x="78" y="709" font-size="19" font-weight="650">Local storage</text>
+<rect x="78" y="730" width="31" height="18" rx="9" fill="#27674f"/><circle cx="101" cy="739" r="6" fill="white"/><text x="122" y="744" class="small">Save messages locally</text>
+<rect x="78" y="770" width="31" height="18" rx="9" fill="#e4e8df"/><circle cx="86" cy="779" r="6" fill="white"/><text x="122" y="784" class="small">Keep me signed in</text>
+<text x="78" y="822" font-size="12" class="muted">Your computer. Your choice.</text>
+<!-- Explorer -->
+<text x="392" y="266" class="label muted">CHANNEL EXPLORER</text><text x="390" y="302" font-size="28" font-weight="700">The Reading Room</text>
+<rect x="1046" y="266" width="149" height="34" rx="8" fill="white" stroke="#e4e8df"/><text x="1063" y="288" class="small">Blocked box (3)</text>
+<rect x="1207" y="266" width="176" height="34" rx="17" fill="#e5efdc"/><text x="1228" y="288" class="small green">Fetched 1,998 messages</text>
+<rect x="390" y="324" width="994" height="130" rx="16" class="card"/>
+<text x="411" y="351" class="small muted">Search fetched messages</text>
+<rect x="411" y="365" width="550" height="42" rx="9" fill="#f7f8f4" stroke="#e4e8df"/><text x="427" y="391" class="small muted">⌕  Search keywords in the current sort order…</text>
+<rect x="978" y="365" width="178" height="42" rx="9" fill="#f7f8f4" stroke="#e4e8df"/><text x="994" y="391" class="small">♡  Heart reactions ⌄</text>
+<rect x="1172" y="365" width="190" height="42" rx="9" fill="#f7f8f4" stroke="#e4e8df"/><text x="1187" y="391" class="small">Most reactions ⌄</text>
+<text x="412" y="434" class="small green">#reading</text><text x="523" y="434" class="small muted">Keep the ranking. Find your next read.</text>
+<text x="391" y="481" class="small muted">1,998 in snapshot · 3 blocked · 248 matches</text>
+<rect x="390" y="502" width="994" height="173" rx="16" class="card" filter="url(#shadow)"/>
+<rect x="411" y="521" width="30" height="26" rx="8" fill="#e5efdc"/><text x="421" y="539" class="small green" font-weight="700">1</text><text x="455" y="539" font-size="13" class="muted">Oct 08, 2026 · 09:30</text><text x="1287" y="539" font-size="13" class="green">Original ↗</text>
+<text x="412" y="577" font-size="18">A quiet reminder: save the things that make you want to read again.</text><text x="412" y="603" font-size="15" class="muted">A small collection of ideas, books and everyday discoveries. #reading</text>
+<rect x="411" y="626" width="77" height="29" rx="15" fill="#e5efdc"/><text x="425" y="646" class="small green">♡  248</text><rect x="497" y="626" width="72" height="29" rx="15" fill="#f7f8f4"/><text x="511" y="646" class="small">↗  61</text><text x="1203" y="646" font-size="12" class="muted">Move to blocked box</text>
+<rect x="390" y="692" width="994" height="161" rx="16" class="card"/>
+<rect x="411" y="710" width="30" height="26" rx="8" fill="#e5efdc"/><text x="421" y="729" class="small green" font-weight="700">2</text><text x="455" y="728" font-size="13" class="muted">Oct 07, 2026 · 16:45</text><text x="1287" y="728" font-size="13" class="green">Original ↗</text>
+<text x="412" y="767" font-size="18">The best notes leave room for a new question.</text><text x="412" y="794" font-size="15" class="muted">Three ways to make your reading list feel a little more personal. #reading</text><text x="425" y="828" class="small green">♡  176</text><text x="515" y="828" class="small muted">↗  42</text><text x="1203" y="828" font-size="12" class="muted">Move to blocked box</text>
+<text x="58" y="891" font-size="12" class="muted">TG-MFG · macOS &amp; Windows · Entirely AI-generated</text><text x="1210" y="891" font-size="12" class="muted">Fictional demo content</text>
+</svg>
