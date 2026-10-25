@@ -92,7 +92,27 @@
         <div id="resultToolbar" class="toolbar">
           <label for="messageSearch" class="search-label">Search fetched messages</label>
           <div class="search-wrap"><span aria-hidden="true">⌕</span><input id="messageSearch" type="search" placeholder="Search keywords in the current sort order…" disabled></div>
-          <div class="filters"><div><label for="emojiSelect">Reaction to rank by</label><select id="emojiSelect" disabled><option value="">All reactions</option><option value="❤">❤️ Heart</option><option value="👍">👍 Thumbs up</option><option value="🔥">🔥 Fire</option></select></div><div><label for="sortSelect">Sort order</label><select id="sortSelect" disabled><option value="reactions">Most reactions</option><option value="newest">Newest first</option><option value="oldest">Oldest first</option></select></div><div><label for="hashtagSelect"># Hashtag filter</label><select id="hashtagSelect" disabled><option value="">All hashtags</option></select></div><label class="check zero"><input id="hideZero" type="checkbox" disabled>Only messages with reactions</label></div>
+          <div class="filters">
+            <div class="filter-group">
+              <label id="emojiFilterLabel">Reactions to rank by</label>
+              <details class="multi-filter" id="emojiFilter">
+                <summary id="emojiSummary" aria-labelledby="emojiFilterLabel emojiSummaryText"><span id="emojiSummaryText">All reactions</span></summary>
+                <fieldset id="emojiSelect" disabled><legend class="sr-only">Reactions to rank by</legend><button type="button" id="clearEmojis" class="link-button">Clear selection</button><div id="emojiOptions" class="filter-options"></div></fieldset>
+              </details>
+              <label class="check filter-exclude"><input id="excludeEmojis" type="checkbox" disabled>Exclude selected reactions</label>
+            </div>
+            <div class="filter-group">
+              <label id="hashtagFilterLabel"># Hashtag filter</label>
+              <details class="multi-filter" id="hashtagFilter">
+                <summary id="hashtagSummary" aria-labelledby="hashtagFilterLabel hashtagSummaryText"><span id="hashtagSummaryText">All hashtags</span></summary>
+                <fieldset id="hashtagSelect" disabled><legend class="sr-only"># Hashtag filter</legend><button type="button" id="clearHashtags" class="link-button">Clear selection</button><div id="hashtagOptions" class="filter-options"></div></fieldset>
+              </details>
+              <label class="check filter-exclude"><input id="excludeHashtags" type="checkbox" disabled>Exclude selected hashtags</label>
+            </div>
+            <div class="filter-group"><label for="sortSelect">Sort order</label><select id="sortSelect" disabled><option value="reactions">Most reactions</option><option value="newest">Newest first</option><option value="oldest">Oldest first</option></select></div>
+            <label class="check zero"><input id="hideZero" type="checkbox" disabled>Only messages with reactions</label>
+          </div>
+          <p id="filterHelp" class="field-help">Select multiple reactions to add their counts. Match any selected hashtag; combine with keyword search. Exclusion is off by default.</p>
         </div>
         <p id="resultSummary" class="result-summary">Text and hashtag filters search fetched messages in the current sort order.</p>
         <div id="emptyState" class="empty-state"><div class="empty-art" aria-hidden="true"><span>❤️</span><span>↗</span><span>🔥</span><span>👍</span></div><h3>Good reads are waiting</h3><p>Connect your account and choose a channel.<br>Fetched messages will appear here, sorted by reactions.</p><div class="feature-pills"><span>Rank by reactions</span><span>Search keywords</span><span>Open originals</span></div></div>

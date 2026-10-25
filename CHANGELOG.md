@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.7.0
+
+- Select multiple reactions and rank by their combined count; select multiple hashtags with any-match filtering alongside keyword search.
+- Independently exclude messages containing any selected reaction or hashtag, off by default. Reaction exclusion ranks the remaining messages by total reactions.
+- Clearable, keyboard-accessible selection menus preserve selections across language switches and blocked-box restoration. Filters operate only on fetched snapshots without extra Telegram requests.
+
 ## 1.6.1
 
 - Proxy regression tests handle Windows connection deadlines and Python 3.9 timeout types while explicitly checking that failures never connect directly to the destination.

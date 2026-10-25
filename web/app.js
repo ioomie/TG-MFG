@@ -1,5 +1,5 @@
 import {t, locale, onLanguageChange, englishError} from './i18n.js';
-import {selectMessages, score, emojiLabel, collectHashtags, extractHashtags, normalizeHashtag} from './logic.js';
+import {selectMessages, score, emojiLabel, collectHashtags, extractHashtags, normalizeHashtag, normalizeEmoji} from './logic.js';
 import {prepareCore, isPortal, localFetch, showCorePanel} from './core.js';
 import {setupDiagnostics} from './diagnostics.js';
 
@@ -17,6 +17,8 @@ let speedSupported = false, appliedInterval = 1;
 let storageSupported = false, stage = 'disconnected', savedChannels = [], storagePrefs = {save_messages:false, retain_login:false};
 let restorePolling = null;
 let lastScan = null, lastState = null;
+let selectedEmojis = [], selectedHashtags = [];
+let hashtagLabels = new Map();
 const channelCounts = new Map();
 const pageSize = 30;
 
@@ -213,11 +215,12 @@ function clearResults() {
   $('toggleBlocked').textContent = t("Blocked box ({0})", [fmt.format(blockedMessages.length)]);
   $('toggleBlocked').setAttribute('aria-pressed', 'false');
   $('messageSearch').value = '';
-  $('emojiSelect').value = '';
+  selectedEmojis = []; selectedHashtags = [];
+  $('excludeEmojis').checked = $('excludeHashtags').checked = false;
   $('hideZero').checked = false;
   $('sortSelect').value = 'reactions';
-  $('hashtagSelect').replaceChildren(new Option(t("All hashtags"), ''));
-  for (const id of ['messageSearch', 'emojiSelect', 'sortSelect', 'hashtagSelect', 'hideZero']) $(id).disabled = true;
+  populateEmojis(); populateHashtags(); updateFilterSummary();
+  for (const id of ['messageSearch', 'emojiSelect', 'sortSelect', 'hashtagSelect', 'hideZero', 'excludeEmojis', 'excludeHashtags']) $(id).disabled = true;
   $('messageList').replaceChildren(); $('pagination').hidden = true;
   $('emptyState').hidden = false;
   $('emptyState').querySelector('h3').textContent = t("Good reads are waiting");
@@ -299,7 +302,7 @@ async function finish(scan) {
   blockedMessages = result.blocked_messages || [];
   resultsChannelId = result.scan.channel_id || '';
   showProgress(scan); populateEmojis(); populateHashtags();
-  for (const id of ['messageSearch', 'emojiSelect', 'sortSelect', 'hashtagSelect', 'hideZero']) $(id).disabled = false;
+  for (const id of ['messageSearch', 'emojiSelect', 'sortSelect', 'hashtagSelect', 'hideZero', 'excludeEmojis', 'excludeHashtags']) $(id).disabled = false;
   if (storageSupported) await updateState(await api('status'));
   if (scan.status === 'error') notice(`${englishError(scan.error)} Kept ${fmt.format(messages.length)} successfully fetched messages.`);
   else if (scan.status === 'cancelled') notice(t("Fetching stopped. Kept {0} messages.", [fmt.format(messages.length)]), true);
@@ -331,30 +334,44 @@ $('disconnect').addEventListener('click', () => action(async () => {
   notice(t("Account disconnected. Saved login, messages and blocked records were cleared from this computer."), true);
 }));
 
+function filterOption(key, label, selected, onChange) {
+  const row = node('label', 'check filter-option');
+  const checkbox = document.createElement('input'); checkbox.type = 'checkbox'; checkbox.value = key; checkbox.checked = selected;
+  const text = node('span', '', label); text.setAttribute('data-user-content', '');
+  checkbox.addEventListener('change', () => {onChange(checkbox.checked); page = 1; render();});
+  row.append(checkbox, text); return row;
+}
+
 function populateEmojis() {
-  const keys = new Set(['❤', '👍', '🔥']);
-  for (const message of messages) for (const key of Object.keys(message.reactions)) keys.add(key);
-  $('emojiSelect').replaceChildren();
-  const all = document.createElement('option'); all.value = ''; all.textContent = t("All reactions"); $('emojiSelect').append(all);
-  for (const key of keys) {
-    const option = document.createElement('option'); option.value = key; option.textContent = emojiLabel(key);
-    $('emojiSelect').append(option);
-  }
+  const keys = new Set(['❤', '👍', '🔥', ...selectedEmojis]);
+  for (const message of messages) for (const key of Object.keys(message.reactions)) keys.add(normalizeEmoji(key));
+  $('emojiOptions').replaceChildren(...[...keys].map(key => filterOption(key, emojiLabel(key), selectedEmojis.includes(key), checked => {
+    selectedEmojis = checked ? [...selectedEmojis, key] : selectedEmojis.filter(value => value !== key);
+  })));
 }
 
 function populateHashtags() {
-  const selected = $('hashtagSelect').value;
-  const selectedLabel = $('hashtagSelect').selectedOptions[0]?.textContent.split(' · ')[0];
   const tags = collectHashtags(messages);
-  $('hashtagSelect').replaceChildren(new Option(tags.length ? t("All hashtags") : t("No hashtags"), ''));
-  for (const tag of tags) $('hashtagSelect').append(new Option(t("{0} · {1} messages", [tag.label, fmt.format(tag.count)]), tag.key));
-  if (tags.some(tag => tag.key === selected)) $('hashtagSelect').value = selected;
-  else if (selected) {
-    // Keep an active filter even when its final matching message has been blocked.
-    $('hashtagSelect').append(new Option(t("{0} · 0 messages", [selectedLabel]), selected));
-    $('hashtagSelect').value = selected;
-  }
+  // Preserve active selections even if their final matching message has been blocked.
+  for (const key of selectedHashtags) if (!tags.some(tag => tag.key === key)) tags.push({key, label:hashtagLabels.get(key) || key, count:0});
+  hashtagLabels = new Map(tags.map(tag => [tag.key, tag.label]));
+  $('hashtagOptions').replaceChildren(...tags.map(tag => filterOption(tag.key, t("{0} · {1} messages", [tag.label, fmt.format(tag.count)]), selectedHashtags.includes(tag.key), checked => {
+    selectedHashtags = checked ? [...selectedHashtags, tag.key] : selectedHashtags.filter(value => value !== tag.key);
+  })));
+  if (!tags.length) $('hashtagOptions').append(node('p', 'field-help', t("No hashtags")));
 }
+
+function updateFilterSummary() {
+  $('emojiSummaryText').textContent = selectedEmojis.length ? selectedEmojis.map(emojiLabel).join(' + ') : t("All reactions");
+  $('hashtagSummaryText').textContent = selectedHashtags.length ? selectedHashtags.map(key => hashtagLabels.get(key) || key).join(', ') : t("All hashtags");
+  $('filterHelp').textContent = $('excludeEmojis').checked ? t("Exclude messages with any selected reaction. Remaining messages rank by total reactions. Hashtag and keyword filters still apply.") : t("Select multiple reactions to add their counts. Match any selected hashtag; combine with keyword search. Exclusion is off by default.");
+}
+
+for (const [id, kind] of [['clearEmojis', 'emoji'], ['clearHashtags', 'hashtag']]) $(id).addEventListener('click', () => {
+  if (kind === 'emoji') {selectedEmojis = []; populateEmojis();}
+  else {selectedHashtags = []; populateHashtags();}
+  page = 1; render();
+});
 
 $('toggleBlocked').addEventListener('click', () => {
   viewingBlocked = !viewingBlocked; page = 1; render();
@@ -381,7 +398,7 @@ function node(tag, className, text) {
   return el;
 }
 
-function card(message, rank, emoji) {
+function card(message, rank, emojis) {
   const article = node('article', 'message-card');
   article.dataset.messageId = message.id;
   article.dataset.channelId = message.channel_id || resultsChannelId;
@@ -413,9 +430,9 @@ function card(message, rank, emoji) {
   if (hashtags.length && !viewingBlocked) {
     const tags = node('div', 'hashtag-chips');
     for (const tag of hashtags) {
-      const button = node('button', `hashtag-chip${normalizeHashtag(tag) === $('hashtagSelect').value ? ' selected' : ''}`, tag);
+      const button = node('button', `hashtag-chip${selectedHashtags.includes(normalizeHashtag(tag)) ? ' selected' : ''}`, tag);
       button.title = t("Filter by {0} in the current sort order", [tag]);
-      button.addEventListener('click', () => {$('hashtagSelect').value = normalizeHashtag(tag); page = 1; render();});
+      button.addEventListener('click', () => {const key = normalizeHashtag(tag); selectedHashtags = selectedHashtags.includes(key) ? selectedHashtags.filter(value => value !== key) : [...selectedHashtags, key]; populateHashtags(); page = 1; render();});
       tags.append(button);
     }
     article.append(tags);
@@ -423,10 +440,10 @@ function card(message, rank, emoji) {
   const bottom = node('div', 'card-bottom'), chips = node('div', 'reaction-chips');
   const reactions = Object.entries(message.reactions).sort((a,b) => b[1] - a[1]);
   for (const [key, count] of reactions) {
-    chips.append(node('span', `reaction-chip${key === emoji ? ' selected' : ''}`, `${emojiLabel(key)} ${fmt.format(count)}`));
+    chips.append(node('span', `reaction-chip${emojis.includes(normalizeEmoji(key)) ? ' selected' : ''}`, `${emojiLabel(key)} ${fmt.format(count)}`));
   }
   if (!reactions.length) chips.append(node('span', 'reaction-chip', t("No reactions")));
-  const total = node('div', 'score-label'); total.append(node('strong', '', fmt.format(score(message, emoji))), node('span', '', emoji ? emojiLabel(emoji) : t("Total reactions")));
+  const total = node('div', 'score-label'); total.append(node('strong', '', fmt.format(score(message, emojis))), node('span', '', emojis.length ? emojis.map(emojiLabel).join(" + ") : t("Total reactions")));
   bottom.append(chips, total); article.append(bottom);
   const actions = node('div', 'message-actions');
   const blockButton = node('button', 'secondary block-message', viewingBlocked ? t("Restore message") : t("Move to blocked box"));
@@ -437,9 +454,11 @@ function card(message, rank, emoji) {
 }
 
 function render() {
-  const emoji = viewingBlocked ? '' : $('emojiSelect').value;
-  const filtered = viewingBlocked ? [...blockedMessages].reverse() : selectMessages(messages, {query: $('messageSearch').value, emoji,
-    sort: $('sortSelect').value, hashtag: $('hashtagSelect').value, hideZero: $('hideZero').checked});
+  updateFilterSummary();
+  const emojis = viewingBlocked || $('excludeEmojis').checked ? [] : selectedEmojis;
+  const filtered = viewingBlocked ? [...blockedMessages].reverse() : selectMessages(messages, {query: $('messageSearch').value, emoji:selectedEmojis,
+    sort: $('sortSelect').value, hashtag:selectedHashtags, hideZero: $('hideZero').checked,
+    excludeEmojis:$('excludeEmojis').checked, excludeHashtags:$('excludeHashtags').checked});
   const blockedCount = messages.filter(message => message.blocked).length;
   $('resultToolbar').hidden = viewingBlocked;
   $('blockedHelp').hidden = !viewingBlocked;
@@ -451,22 +470,29 @@ function render() {
   $('resultsArea').setAttribute('aria-label', viewingBlocked ? t("Blocked box") : t("Message explorer"));
   const pages = Math.max(1, Math.ceil(filtered.length / pageSize)); page = Math.min(page, pages);
   const start = (page - 1) * pageSize;
-  $('messageList').replaceChildren(...filtered.slice(start, start + pageSize).map((message, i) => card(message, start + i + 1, emoji)));
+  $('messageList').replaceChildren(...filtered.slice(start, start + pageSize).map((message, i) => card(message, start + i + 1, emojis)));
   $('emptyState').hidden = filtered.length > 0;
   if (!filtered.length) {
     $('emptyState').querySelector('h3').textContent = viewingBlocked ? t("The blocked box is empty") : messages.length ? t("No matching messages") : t("No messages to display yet");
     $('emptyState').querySelector('p').textContent = viewingBlocked ? t("Click “Move to blocked box” on a message to exclude it from search.") : messages.length ? t("Try another keyword or hashtag, or restore a message from the blocked box.") : t("Try a different date range or fetch more messages.");
   }
-  const tagLabel = $('hashtagSelect').value ? t(" · Hashtag {0}", [$('hashtagSelect').selectedOptions[0].textContent.split(' · ')[0]]) : '';
+  const tagLabel = selectedHashtags.length ? t($('excludeHashtags').checked ? " · Excluding hashtags {0}" : " · Hashtags (any): {0}", [selectedHashtags.join(', ')]) : '';
   $('resultSummary').textContent = viewingBlocked ? t("{0} blocked messages across saved and previously fetched channels, most recently blocked first. {1}", [fmt.format(blockedMessages.length), messages.length && !blockingSupported ? t("Download and install core 1.3.0 or later to use the blocked box.") : '']) : t("{0} · {1} messages in snapshot ({2} unavailable), {3} blocked, {4} matches{5}. Blocked messages are excluded from search. Paid Stars do not affect sorting.", [scannedChannel, fmt.format(messages.length), fmt.format(messages.filter(row => row.unavailable).length), fmt.format(blockedCount), fmt.format(filtered.length), tagLabel]);
   $('pagination').hidden = filtered.length <= pageSize;
   $('pageInfo').textContent = `${page} / ${pages}`;
   $('previous').disabled = page === 1; $('next').disabled = page === pages;
 }
 
+document.addEventListener('click', event => {
+  for (const id of ['emojiFilter', 'hashtagFilter']) if (!$(id).contains(event.target)) $(id).open = false;
+});
+for (const id of ['emojiFilter', 'hashtagFilter']) $(id).addEventListener('keydown', event => {
+  if (event.key === 'Escape') {$(id).open = false; $(id).querySelector('summary').focus();}
+});
+
 let searchTimer;
 $('messageSearch').addEventListener('input', () => {clearTimeout(searchTimer); searchTimer = setTimeout(() => {page = 1; render();}, 150);});
-for (const id of ['emojiSelect', 'sortSelect', 'hashtagSelect', 'hideZero']) $(id).addEventListener('change', () => {page = 1; render();});
+for (const id of ['sortSelect', 'hideZero', 'excludeEmojis', 'excludeHashtags']) $(id).addEventListener('change', () => {page = 1; render();});
 for (const [id, step] of [['previous', -1], ['next', 1]]) $(id).addEventListener('click', () => {page += step; render(); $('resultsTitle').scrollIntoView({behavior:'smooth', block:'start'});});
 
 function showReport(scan) {

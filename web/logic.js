@@ -1,7 +1,13 @@
-import {t, locale, onLanguageChange} from './i18n.js';
+import {t, locale} from './i18n.js';
 export function normalizeEmoji(value) { return value.replace(/\ufe0f/g, ''); }
-export function score(message, emoji) {
-  return emoji ? (message.reactions[normalizeEmoji(emoji)] || 0) : message.total;
+function selections(value, normalize) {
+  return [...new Set((Array.isArray(value) ? value : [value]).map(normalize).filter(Boolean))];
+}
+function reactionScore(message, keys) {
+  return keys.length ? keys.reduce((total, key) => total + (message.reactions[key] || 0), 0) : message.total;
+}
+export function score(message, emoji = '') {
+  return reactionScore(message, selections(emoji, normalizeEmoji));
 }
 export function normalizeHashtag(value) {
   const tag = value.trim().normalize('NFC').toLocaleLowerCase();
@@ -27,17 +33,26 @@ export function collectHashtags(messages) {
   }
   return [...tags.values()].sort((a,b) => b.count - a.count || a.label.localeCompare(b.label, locale()));
 }
-export function selectMessages(messages, {query = '', emoji = '', sort = 'reactions', hideZero = false, hashtag = ''} = {}) {
+export function selectMessages(messages, {query = '', emoji = '', sort = 'reactions', hideZero = false, hashtag = '',
+  excludeEmojis = false, excludeHashtags = false} = {}) {
   const keyword = query.trim().toLocaleLowerCase();
-  const tag = normalizeHashtag(hashtag);
-  return messages.filter(message => !message.blocked && !message.unavailable && (!keyword || message.text.toLocaleLowerCase().includes(keyword)) &&
-    (!tag || extractHashtags(message).some(value => normalizeHashtag(value) === tag)) &&
-    (!hideZero || score(message, emoji) > 0)).sort((a, b) => {
-      const time = Date.parse(b.date) - Date.parse(a.date);
-      if (sort === 'oldest') return -time || a.id - b.id;
-      if (sort === 'newest') return time || b.id - a.id;
-      return score(b, emoji) - score(a, emoji) || time || b.id - a.id;
-    });
+  const emojis = selections(emoji, normalizeEmoji), tags = selections(hashtag, normalizeHashtag);
+  // Excluded reactions cannot contribute to a score: rank the remaining rows by total.
+  const ranking = excludeEmojis ? [] : emojis;
+  return messages.filter(message => {
+    if (message.blocked || message.unavailable || (keyword && !message.text.toLocaleLowerCase().includes(keyword))) return false;
+    if (excludeEmojis && emojis.some(key => (message.reactions[key] || 0) > 0)) return false;
+    if (tags.length) {
+      const matches = extractHashtags(message).some(value => tags.includes(normalizeHashtag(value)));
+      if (excludeHashtags ? matches : !matches) return false;
+    }
+    return !hideZero || reactionScore(message, ranking) > 0;
+  }).sort((a, b) => {
+    const time = Date.parse(b.date) - Date.parse(a.date);
+    if (sort === 'oldest') return -time || a.id - b.id;
+    if (sort === 'newest') return time || b.id - a.id;
+    return reactionScore(b, ranking) - reactionScore(a, ranking) || time || b.id - a.id;
+  });
 }
 export function emojiLabel(value) {
   if (value.startsWith('custom:')) return t("Custom reaction #{0}", [value.slice(7)]);

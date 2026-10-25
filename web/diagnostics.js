@@ -47,7 +47,7 @@ export function setupDiagnostics(origin, tokenGetter) {
       debugEnabled = snapshot.debug_enabled === true;
       $('enableDebug').textContent = debugEnabled ? t("Disable core debug log") : t("Enable core debug log");
     } catch {snapshot = null;}
-    const report = {application:'TG-MFG diagnostics',frontend_version:'1.6.0',website:location.origin,
+    const report = {application:'TG-MFG diagnostics',frontend_version:'1.7.0',website:location.origin,
       browser:navigator.userAgent,secure_context:window.isSecureContext,core_report_available:available,
       browser_events:[...events],core:snapshot};
     // Inputs, request bodies, tokens, phone numbers and message contents are never collected.

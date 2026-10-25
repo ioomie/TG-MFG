@@ -1,5 +1,14 @@
 // Chinese interface text. Errors are always English.
 export const chinese = {
+  "Reactions to rank by": "用于排序的表情（可多选）",
+  "Clear selection": "清空选择",
+  "Exclude selected reactions": "反向排除所选表情",
+  "Exclude selected hashtags": "反向排除所选标签",
+  "Select multiple reactions to add their counts. Match any selected hashtag; combine with keyword search. Exclusion is off by default.": "多选表情将数量相加排序；标签匹配任意一个，可叠加文字检索。反向排除默认关闭。",
+  "Exclude messages with any selected reaction. Remaining messages rank by total reactions. Hashtag and keyword filters still apply.": "排除含任一所选表情的消息，其余消息按总表情数排序。标签和文字过滤仍然生效。",
+  " · Excluding hashtags {0}": " · 排除标签 {0}",
+  " · Hashtags (any): {0}": " · 标签（任意一个）：{0}",
+
   "Telegram signed in · Local session": "Telegram 已登录 · 本机会话",
   "Telegram disconnected": "Telegram 尚未连接",
   "Restoring saved login…": "正在恢复保存的登录…",

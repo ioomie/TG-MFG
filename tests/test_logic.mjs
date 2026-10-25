@@ -67,3 +67,47 @@ test('unavailable cached messages stay out of search and hashtag menus', () => {
   assert.deepEqual(selectMessages(rows,{hashtag:'#unavailable'}), []);
   assert.equal(collectHashtags(rows).some(tag => tag.key === '#unavailable'), false);
 });
+
+test('multiple reactions sum once per normalized emoji and use date/id tie breakers', () => {
+  assert.equal(score(data[0], ['❤️','❤','👍','👍']), 12);
+  assert.deepEqual(selectMessages(data,{emoji:['❤️','👍']}).map(row=>row.id), [1,4,2,3]);
+  assert.equal(score(data[0], []), 12);
+  assert.equal(score({...data[0], reactions:{'custom:123':7}}, ['custom:123','🔥']), 7);
+  const tied = [{...data[0], id:5}, data[0]];
+  assert.deepEqual(selectMessages(tied,{emoji:['👍','❤']}).map(row=>row.id), [5,1]);
+});
+
+test('multiple hashtag filters match any exact normalized tag alongside query and combined ranking', () => {
+  const rows = data.map((row,i)=>({...row,hashtags:[['#UI'],['#ai'],['#Other'],['#Design']][i]}));
+  assert.deepEqual(selectMessages(rows,{emoji:['❤','👍'],hashtag:['#UI','AI','ui'],hideZero:true}).map(row=>row.id), [1,2]);
+  assert.deepEqual(selectMessages(rows,{emoji:['❤','👍'],hashtag:['#UI','#Design'],query:'design'}).map(row=>row.id), [1,4]);
+  assert.deepEqual(selectMessages(rows,{hashtag:['#A','#U']}), []);
+  assert.deepEqual(selectMessages(rows,{hashtag:[]}).map(row=>row.id), [1,4,2,3]);
+});
+
+test('independent inverse filters exclude any matching item and keep text/time sorting', () => {
+  const rows = data.map((row,i)=>({...row,hashtags:[['#UI'],['#ai'],['#Other'],['#Design']][i]}));
+  assert.deepEqual(selectMessages(rows,{emoji:['👍'],excludeEmojis:true,hashtag:['#AI','#Other'],excludeHashtags:true,query:'design'}).map(row=>row.id), [4]);
+  assert.deepEqual(selectMessages(rows,{emoji:['❤','👍'],excludeEmojis:true}).map(row=>row.id), [3]);
+  assert.deepEqual(selectMessages(rows,{hashtag:['#AI','#UI'],excludeHashtags:true,sort:'oldest'}).map(row=>row.id), [3,4]);
+  assert.deepEqual(selectMessages(rows,{emoji:['👍'],excludeEmojis:true,hashtag:['#AI','#Design'],sort:'newest'}).map(row=>row.id), [4,2]);
+});
+
+test('reaction exclusion uses total score for ranking and hide zero; empty inverse selections are no-ops', () => {
+  const rows = [
+    {...data[0],reactions:{'🔥':12}}, {...data[1],reactions:{'🔥':9}}, data[2],
+    {...data[3],reactions:{'👍':9}},
+  ];
+  assert.deepEqual(selectMessages(rows,{emoji:['❤','👍'],excludeEmojis:true,hideZero:true}).map(row=>row.id), [1,2]);
+  assert.deepEqual(selectMessages(rows,{emoji:[],hashtag:[],excludeEmojis:true,excludeHashtags:true}).map(row=>row.id), [1,4,2,3]);
+  assert.deepEqual(selectMessages(rows,{emoji:['❤','👍'],hideZero:true}).map(row=>row.id), [4]);
+});
+
+test('combined filters never recover blocked/unavailable rows or mutate snapshots/selections', () => {
+  const rows = data.map(row=>({...row,hashtags:['#AI'],blocked:row.id===1,unavailable:row.id===4}));
+  const emoji=['❤️','👍'],hashtag=['ai'];
+  const original=structuredClone({rows,emoji,hashtag});
+  assert.deepEqual(selectMessages(rows,{emoji,hashtag,hideZero:true}).map(row=>row.id), [2]);
+  assert.deepEqual(selectMessages(rows,{emoji:['👍'],excludeEmojis:true,hashtag}).map(row=>row.id), [2,3]);
+  assert.deepEqual({rows,emoji,hashtag},original);
+});

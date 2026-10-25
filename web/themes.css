@@ -44,3 +44,19 @@
 :root[data-theme="dark"] .notice{background:#30291c;border-color:#655234;color:#e5cf9f}
 :root[data-theme="dark"] .notice.info{background:#233723;border-color:#405d37;color:#bdd9aa}
 @media(max-width:680px){.header-actions{align-items:end;flex-direction:column;gap:8px}.session{max-width:190px}#themeSelect{width:115px;min-height:30px;padding:5px 8px;font-size:10px}.filters>div{min-width:100px}}
+/* Multi-selection menus use native details and labelled checkboxes. */
+.filters{align-items:start}
+.filters>.filter-group{min-width:150px;min-inline-size:0}
+.multi-filter{position:relative;margin:0;color:var(--ink);font-size:11px}
+.multi-filter>summary{border:1px solid var(--line);border-radius:9px;padding:8px 11px;min-height:36px;background:var(--white);overflow-wrap:anywhere}
+.multi-filter>summary span{vertical-align:middle}
+.multi-filter>fieldset{width:100%;min-inline-size:0;margin:5px 0 0;padding:5px 10px 10px;border:1px solid var(--line);border-radius:9px;background:var(--white);box-shadow:0 8px 25px #142f201a}
+.multi-filter .link-button{padding:6px 0;font-size:11px}
+.filter-options{max-height:230px;overflow:auto;overscroll-behavior:contain}
+.filters .filter-option{margin:0;padding:8px 2px;font-size:11px;color:var(--ink);white-space:normal;overflow-wrap:anywhere;letter-spacing:0}
+.filter-option input{flex-shrink:0}
+.filters .filter-exclude{margin:9px 0 0;white-space:normal;line-height:1.5;letter-spacing:0}
+.filters .zero{margin-top:0}
+#filterHelp{margin:12px 0 0}
+.score-label{white-space:normal;text-align:right;overflow-wrap:anywhere;max-width:50%}
+@media(max-width:680px){.filters>.filter-group{flex-basis:100%}.multi-filter>fieldset{min-width:0}.multi-filter>summary{font-size:12px}.filters .filter-exclude,.filters .filter-option{font-size:12px}}

@@ -18,7 +18,7 @@ Browse your Telegram channels locally, rank messages by ❤️ or other reaction
 
 - List your joined broadcast channels, including archived channels.
 - Count visible channel messages with one history request, without downloading the full history.
-- Rank by total reactions, a selected reaction or message date. Combine keyword search and Telegram `#hashtag` filters without changing the sort order.
+- Rank by total reactions, selected reactions added together, or message date. Combine keyword search and Telegram `#hashtag` filters without changing the sort order.
 - Move messages to a **blocked box** to exclude them from the normal list, search and hashtag filters; restore individually.
 - Fetch a chosen range or all readable history, with inclusive local-time date filters and cancellation that keeps partial results.
 - Choose a minimum batch interval of **0.5, 1, 2, 5, 10 or 30 seconds** (default: 1). Adjust it during fetching.
@@ -49,6 +49,8 @@ run.bat
 The first run creates `.venv` and installs pinned dependencies from official PyPI with SHA-256 verification. Open **http://127.0.0.1:8765**, enter your own [Telegram API ID and API Hash](https://my.telegram.org/apps), and sign in. These are user API credentials, not a Bot Token. Login codes may arrive in the official Telegram app; a two-step password is required if enabled.
 
 Choose a channel, optionally count its messages, then select the fetch range and speed. Telethon requests **up to 100 records per batch**, sometimes fewer. A 2,000-record range is fetched across multiple batches. The interval is a minimum delay between batch requests, not a per-message delay or a guaranteed throughput. Network time also affects speed. Changes apply to later batches without interrupting the current wait. A Telegram FloodWait stops fetching and keeps partial results.
+
+Choose multiple reactions (for example ❤️ + 👍) to add their counts for ranking. Choose multiple hashtags to match **any** of them; hashtag and keyword conditions must both match. Each selector has an **Exclude selected** switch, off by default: it removes messages containing any selected item. With reaction exclusion enabled, remaining messages rank by total reactions and “Only messages with reactions” uses that total. Empty selections impose no restriction. Hashtag chips toggle individual selections; use **Clear selection** to reset a selector. These controls do not change snapshots or the blocked box.
 
 Search and sorting use fetched snapshots only. Search does not make extra Telegram requests. Media captions are searchable; media files, comments and OCR are not fetched. Paid Stars are excluded from ordinary reaction totals.
 
