@@ -52,6 +52,8 @@ Choose a channel, optionally count its messages, then select the fetch range and
 
 Choose multiple reactions (for example ❤️ + 👍) to add their counts for ranking. Choose multiple hashtags to match **any** of them; hashtag and keyword conditions must both match. Each selector has an **Exclude selected** switch, off by default: it removes messages containing any selected item. With reaction exclusion enabled, remaining messages rank by total reactions and “Only messages with reactions” uses that total. Empty selections impose no restriction. Hashtag chips toggle individual selections; use **Clear selection** to reset a selector. These controls do not change snapshots or the blocked box.
 
+Click the page numbers to move across results, or enter a page number and press **Go** / Enter. First and last pages remain available; the page range follows the current search and filters.
+
 Search and sorting use fetched snapshots only. Search does not make extra Telegram requests. Media captions are searchable; media files, comments and OCR are not fetched. Paid Stars are excluded from ordinary reaction totals.
 
 If you need a proxy, enable it **before connecting**, enter the actual protocol, host and port, and use **Connection diagnostics → Test proxy settings**. Only proxies without username/password authentication are supported. Failure stops the connection; it never falls back to direct access.

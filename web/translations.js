@@ -1,5 +1,13 @@
 // Chinese interface text. Errors are always English.
 export const chinese = {
+  "Message pages": "消息分页",
+  "Page numbers": "可选页码",
+  "Go to page": "跳转到页",
+  "Go": "跳转",
+  "Go to page {0}": "跳转到第 {0} 页",
+  "Page {0} of {1}": "第 {0} 页，共 {1} 页",
+  "First page": "首页",
+  "Last page": "末页",
   "Reactions to rank by": "用于排序的表情（可多选）",
   "Clear selection": "清空选择",
   "Exclude selected reactions": "反向排除所选表情",

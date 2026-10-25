@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.7.1
+
+- Click nearby page numbers or the first/last page, or enter a page number and press Go/Enter. Navigation follows the current filtered/sorted results and also works in the blocked box. Invalid page numbers show an English error without changing the current page.
+
 ## 1.7.0
 
 - Select multiple reactions and rank by their combined count; select multiple hashtags with any-match filtering alongside keyword search.

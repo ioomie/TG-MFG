@@ -1,5 +1,5 @@
 import {t, locale, onLanguageChange, englishError} from './i18n.js';
-import {selectMessages, score, emojiLabel, collectHashtags, extractHashtags, normalizeHashtag, normalizeEmoji} from './logic.js';
+import {selectMessages, score, emojiLabel, collectHashtags, extractHashtags, normalizeHashtag, normalizeEmoji, paginationItems} from './logic.js';
 import {prepareCore, isPortal, localFetch, showCorePanel} from './core.js';
 import {setupDiagnostics} from './diagnostics.js';
 
@@ -21,6 +21,7 @@ let selectedEmojis = [], selectedHashtags = [];
 let hashtagLabels = new Map();
 const channelCounts = new Map();
 const pageSize = 30;
+let totalPages = 1;
 
 async function api(path, data) {
   let response;
@@ -478,9 +479,7 @@ function render() {
   }
   const tagLabel = selectedHashtags.length ? t($('excludeHashtags').checked ? " · Excluding hashtags {0}" : " · Hashtags (any): {0}", [selectedHashtags.join(', ')]) : '';
   $('resultSummary').textContent = viewingBlocked ? t("{0} blocked messages across saved and previously fetched channels, most recently blocked first. {1}", [fmt.format(blockedMessages.length), messages.length && !blockingSupported ? t("Download and install core 1.3.0 or later to use the blocked box.") : '']) : t("{0} · {1} messages in snapshot ({2} unavailable), {3} blocked, {4} matches{5}. Blocked messages are excluded from search. Paid Stars do not affect sorting.", [scannedChannel, fmt.format(messages.length), fmt.format(messages.filter(row => row.unavailable).length), fmt.format(blockedCount), fmt.format(filtered.length), tagLabel]);
-  $('pagination').hidden = filtered.length <= pageSize;
-  $('pageInfo').textContent = `${page} / ${pages}`;
-  $('previous').disabled = page === 1; $('next').disabled = page === pages;
+  renderPagination(pages, filtered.length);
 }
 
 document.addEventListener('click', event => {
@@ -493,7 +492,39 @@ for (const id of ['emojiFilter', 'hashtagFilter']) $(id).addEventListener('keydo
 let searchTimer;
 $('messageSearch').addEventListener('input', () => {clearTimeout(searchTimer); searchTimer = setTimeout(() => {page = 1; render();}, 150);});
 for (const id of ['sortSelect', 'hideZero', 'excludeEmojis', 'excludeHashtags']) $(id).addEventListener('change', () => {page = 1; render();});
-for (const [id, step] of [['previous', -1], ['next', 1]]) $(id).addEventListener('click', () => {page += step; render(); $('resultsTitle').scrollIntoView({behavior:'smooth', block:'start'});});
+function renderPagination(pages, count) {
+  totalPages = pages;
+  $('pagination').hidden = count <= pageSize;
+  $('pageInfo').textContent = t("Page {0} of {1}", [fmt.format(page), fmt.format(pages)]);
+  $('previous').disabled = page === 1; $('next').disabled = page === pages;
+  $('pageNumber').max = String(pages); $('pageNumber').value = String(page);
+  $('pageNumber').removeAttribute('aria-invalid'); $('pageJumpError').hidden = true;
+  $('pageNumbers').replaceChildren(...paginationItems(page, pages).map(value => {
+    if (value === null) {const gap = node('span', 'page-gap', '…'); gap.setAttribute('aria-hidden', 'true'); return gap;}
+    const button = node('button', 'secondary page-number', fmt.format(value)); button.type = 'button';
+    button.dataset.page = value;
+    button.setAttribute('aria-label', t("Go to page {0}", [fmt.format(value)]));
+    if (value === page) button.setAttribute('aria-current', 'page');
+    if (value === 1 || value === pages) button.title = t(value === 1 ? "First page" : "Last page");
+    button.addEventListener('click', () => goToPage(value));
+    return button;
+  }));
+}
+
+function goToPage(value) {
+  const target = Number(value);
+  if (!Number.isSafeInteger(target) || target < 1 || target > totalPages) {
+    $('pageJumpError').textContent = `Enter a whole page number from 1 to ${totalPages}.`;
+    $('pageJumpError').hidden = false; $('pageNumber').setAttribute('aria-invalid', 'true'); $('pageNumber').focus();
+    return;
+  }
+  page = target; render();
+  $('resultsTitle').scrollIntoView({behavior:'smooth', block:'start'});
+}
+
+for (const [id, step] of [['previous', -1], ['next', 1]]) $(id).addEventListener('click', () => goToPage(page + step));
+$('pageJump').addEventListener('submit', event => {event.preventDefault(); goToPage($('pageNumber').value);});
+$('pageNumber').addEventListener('input', () => {$('pageNumber').removeAttribute('aria-invalid'); $('pageJumpError').hidden = true;});
 
 function showReport(scan) {
   const report = $('scanReport');

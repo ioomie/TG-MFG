@@ -111,3 +111,16 @@ test('combined filters never recover blocked/unavailable rows or mutate snapshot
   assert.deepEqual(selectMessages(rows,{emoji:['👍'],excludeEmojis:true,hashtag}).map(row=>row.id), [2,3]);
   assert.deepEqual({rows,emoji,hashtag},original);
 });
+
+test('page choices expose nearby pages and first/last without listing a large snapshot', async () => {
+  const {paginationItems} = await import('../web/logic.js');
+  assert.deepEqual(paginationItems(1,1), [1]);
+  assert.deepEqual(paginationItems(2,3), [1,2,3]);
+  assert.deepEqual(paginationItems(1,100), [1,2,3,4,5,null,100]);
+  assert.deepEqual(paginationItems(50,100), [1,null,48,49,50,51,52,null,100]);
+  assert.deepEqual(paginationItems(100,100), [1,null,96,97,98,99,100]);
+  const items=paginationItems(5000,10000), numbers=items.filter(value=>value!==null);
+  assert.ok(items.length<=9);
+  assert.equal(numbers[0],1);assert.equal(numbers.at(-1),10000);
+  assert.ok(numbers.includes(5000));assert.equal(new Set(numbers).size,numbers.length);
+});

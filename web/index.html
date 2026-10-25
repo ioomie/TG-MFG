@@ -117,7 +117,11 @@
         <p id="resultSummary" class="result-summary">Text and hashtag filters search fetched messages in the current sort order.</p>
         <div id="emptyState" class="empty-state"><div class="empty-art" aria-hidden="true"><span>❤️</span><span>↗</span><span>🔥</span><span>👍</span></div><h3>Good reads are waiting</h3><p>Connect your account and choose a channel.<br>Fetched messages will appear here, sorted by reactions.</p><div class="feature-pills"><span>Rank by reactions</span><span>Search keywords</span><span>Open originals</span></div></div>
         <div id="messageList" class="message-list"></div>
-        <div id="pagination" class="pagination" hidden><button id="previous" class="secondary">← Previous</button><span id="pageInfo"></span><button id="next" class="secondary">Next →</button></div>
+        <nav id="pagination" class="pagination" aria-label="Message pages" hidden>
+          <div class="page-controls"><button id="previous" class="secondary" type="button">← Previous</button><div id="pageNumbers" class="page-numbers" role="group" aria-label="Page numbers"></div><button id="next" class="secondary" type="button">Next →</button></div>
+          <form id="pageJump" class="page-jump" novalidate><label for="pageNumber">Go to page</label><input id="pageNumber" type="number" min="1" step="1" inputmode="numeric" autocomplete="off" aria-describedby="pageInfo pageJumpError" required><button class="secondary" type="submit">Go</button><span id="pageInfo" role="status"></span></form>
+          <p id="pageJumpError" class="page-jump-error" role="alert" hidden></p>
+        </nav>
       </section>
     </div>
   </main>

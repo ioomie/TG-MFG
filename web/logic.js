@@ -58,3 +58,16 @@ export function emojiLabel(value) {
   if (value.startsWith('custom:')) return t("Custom reaction #{0}", [value.slice(7)]);
   return value === '❤' ? '❤️' : value;
 }
+
+// Keep page navigation bounded even for very large local snapshots.
+export function paginationItems(current, total) {
+  const start = Math.max(1, Math.min(current - 2, total - 4));
+  const numbers = new Set([1, total]);
+  for (let value = start; value <= Math.min(total, start + 4); value++) numbers.add(value);
+  const items = [];
+  for (const value of [...numbers].sort((a, b) => a - b)) {
+    if (items.length && value - items.at(-1) > 1) items.push(null);
+    items.push(value);
+  }
+  return items;
+}
