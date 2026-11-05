@@ -1,7 +1,7 @@
 # Fixed releases and PyPI artifact SHA-256 hashes. Install with --require-hashes.
-python-socks[asyncio]==3.1.1 \
-    --hash=sha256:327e0d6378702c73a7790bf732e9f01392f17b48c7348a50b5bd1f710c2df1be \
-    --hash=sha256:8d3e817cdbe858dc0bb8c8fdc8e79b6ce37acce110d33374c6f57a675cc9029e
+python-socks[asyncio]==3.2.1 \
+    --hash=sha256:d21618ae6c6734d357be83263b3791666d12af59480ace8f48f2b5fcc8edc987 \
+    --hash=sha256:db2c37d4f7aeebfbba91d2d7670718b2d516061b34296fa8498c6f671e87c504
 async-timeout==5.0.1 \
     --hash=sha256:39e3809566ff85354557ec2398b55e096c8364bacac9405a7a1fa429e77fe76c \
     --hash=sha256:d9321a7a3d5a6a5e187e824d2fa0793ce379a202935782d555d6e9d2735677d3
